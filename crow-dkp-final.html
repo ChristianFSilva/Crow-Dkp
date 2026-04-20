@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>CROW죽음 - DKP</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  color:#fff;
+  margin:0;
+}
+
+/* LOGIN */
+.login{
+  display:flex;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
+}
+
+.card{
+  background:rgba(0,0,0,0.6);
+  padding:30px;
+  border-radius:12px;
+  width:320px;
+  text-align:center;
+  box-shadow:0 0 25px rgba(127,119,221,0.5);
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  background:#7F77DD;
+  border:none;
+  padding:10px;
+  width:100%;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover{
+  background:#5a52c7;
+}
+
+/* MAIN */
+.header{
+  background:#111;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  padding:10px;
+}
+
+.tab{
+  background:#222;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.tab.active{
+  background:#7F77DD;
+}
+
+.card-main{
+  background:#1a1a2e;
+  margin:10px;
+  padding:15px;
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+}
+
+.rank{
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+}
+
+.lider{background:#a78bfa}
+.conselheiro{background:#fca5a5}
+.oficial{background:#93c5fd}
+.membro{background:#d4d4d4;color:#000}
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login">
+  <div class="card">
+    <h2>CROW죽음</h2>
+
+    <input id="nick" placeholder="Seu nick">
+
+    <select id="classe">
+      <option>DPS</option>
+      <option>Tank</option>
+      <option>Healer</option>
+    </select>
+
+    <button onclick="entrar()">Entrar na Guild</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main" style="display:none">
+
+<div class="header">
+  <div id="user"></div>
+  <button onclick="logout()">Sair</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active">Ranking</div>
+  <div class="tab">Jogadores</div>
+</div>
+
+<div class="card-main">
+  <table id="players"></table>
+</div>
+
+</div>
+
+<script>
+
+let players = JSON.parse(localStorage.getItem("players")||"[]");
+
+const cargos = {
+  "Baek":"lider",
+  "ChrisChaser":"conselheiro",
+  "Arzulles":"conselheiro",
+  "AMIANTO":"oficial",
+  "AngelDarnkess":"oficial",
+  "Garlicka":"oficial",
+  "Yronchaos":"oficial"
+};
+
+function entrar(){
+  let nick = document.getElementById("nick").value.trim();
+  let classe = document.getElementById("classe").value;
+
+  if(!nick) return alert("Digite seu nick");
+
+  let player = players.find(p=>p.name===nick);
+
+  if(!player){
+    player = {
+      name:nick,
+      class:classe,
+      rank:cargos[nick] || "membro",
+      dkp:0
+    };
+    players.push(player);
+    salvar();
+  }
+
+  sessionStorage.setItem("user",nick);
+
+  document.getElementById("login").style.display="none";
+  document.getElementById("main").style.display="block";
+
+  render();
+}
+
+function logout(){
+  location.reload();
+}
+
+function salvar(){
+  localStorage.setItem("players",JSON.stringify(players));
+}
+
+function render(){
+  let nick = sessionStorage.getItem("user");
+  let p = players.find(x=>x.name===nick);
+
+  document.getElementById("user").innerHTML =
+    nick + " - <span class='rank "+p.rank+"'>"+p.rank+"</span>";
+
+  let html = "<tr><th>Nome</th><th>Classe</th><th>DKP</th></tr>";
+
+  players.sort((a,b)=>b.dkp-a.dkp);
+
+  players.forEach(p=>{
+    html+=`
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.class}</td>
+        <td>${p.dkp}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("players").innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
